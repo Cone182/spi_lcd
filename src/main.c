@@ -606,19 +606,22 @@ int main(void)
   	lcdCircle(64, 64, 40, decodeRgbValue(0, 31, 0));
   	lcdCircle(64, 64, 48, decodeRgbValue(0, 0, 31));*/
 
-  	lcdPutS("Hello World!", lcdTextX(4), lcdTextY(0), decodeRgbValue(0, 0, 0), decodeRgbValue(31, 31, 31));
+  	lcdPutS("Tetris", lcdTextX(1), lcdTextY(0), decodeRgbValue(0, 0, 0), decodeRgbValue(31, 31, 31));
 
-  	lcdPutS("The quick brown fox jumped over the lazy DR Thomas", lcdTextX(1), lcdTextY(2), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
+  	lcdPutS("Level", lcdTextX(1), lcdTextY(2), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
+  	lcdPutS("1", lcdTextX(1), lcdTextY(3), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
+  	lcdPutS("Score", lcdTextX(1), lcdTextY(5), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
+  	lcdPutS("46200", lcdTextX(1), lcdTextY(6), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
 
   	//lcdPutS("Test", 23, 17, 0xFFFF, 0);
 
 
-  	lcdFilledRectangle(1, 64, 128, 128, decodeRgbValue(0, 0, 0));
-  		lcdRectangle(2, 65, 127, 127, decodeRgbValue(31, 31, 31));
+  	lcdFilledRectangle(64, 1, 128, 128, decodeRgbValue(0, 0, 0));
+  	lcdRectangle(57, 1, 127 , 127, decodeRgbValue(31, 31, 31));
 
 	// Run the LCD test
 	uint8_t ballX = 70, ballY = 70;
-	int8_t ballSpeed = 2;
+	int8_t ballSpeed = 1;
 	int8_t xDir = ballSpeed, yDir = ballSpeed;
 
   /* Infinite loop */
@@ -652,7 +655,7 @@ int main(void)
 	  		lcdFilledRectangle(ballX-4, 124, ballX+4, 126, decodeRgbValue(31, 0, 31));
 
 	  		//lcdPutS("Hello World!", lcdTextX(4), lcdTextY(0), decodeRgbValue(0, 0, 0), decodeRgbValue(31, 31, 31));
-	  		Delay(10);
+	  		Delay(5000);
   }
   return 0;
 }
