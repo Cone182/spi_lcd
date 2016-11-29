@@ -629,27 +629,6 @@ unsigned char pic4[]=
 */
 int main(void)
 {
-  int i = 0;
-
-  /**
-  *  IMPORTANT NOTE!
-  *  See the <system_*.c> file and how/if the SystemInit() function updates 
-  *  SCB->VTOR register. Sometimes the symbol VECT_TAB_SRAM needs to be defined 
-  *  when building the project if code has been located to RAM and interrupts 
-  *  are used. Otherwise the interrupt table located in flash will be used.
-  *  E.g.  SCB->VTOR = 0x20000000;  
-  */
-
-  /**
-  *  At this stage the microcontroller clock setting is already configured,
-  *  this is done through SystemInit() function which is called from startup
-  *  file (startup_stm32l1xx_hd.s) before to branch to application main.
-  *  To reconfigure the default setting of SystemInit() function, refer to
-  *  system_stm32l1xx.c file
-  */
-
-  /* TODO - Add your application code here */
-
 	adc_init();
 	startupNVIC();
 	ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
@@ -704,6 +683,7 @@ int main(void)
 		}
 	}
 
+	// sirka a vyska objektu
 	length = 12;
 	height = 12;
 
@@ -733,27 +713,39 @@ int main(void)
 		  ballX[count] += xDir[count]; // doprava
 	  }
 
-	  // v kazdom kroku checkuje ci sa nenachadza nieco na lavej alebo na pravej strane objektu
+	  // v kazdom kroku checkuje ci sa nenachadza nieco na lavej objektu
 	  if (ballX[count]-1 < 57 || checkNextToBlock(matrix, ballX[count]-1,ballY[count], height)){ // lava strana
 		  xDir[count] = 0;
 		  if ((AD_value>2500) && (AD_value<3200)){
 			  xDir[count] = 6;
 		  }
 	  }
+	  // v kazdom kroku checkuje ci sa nenachadza nieco na pravej objektu
 	  if (ballX[count]+length > 116 || checkNextToBlock(matrix, ballX[count]+length,ballY[count], height)){ // prava strana
 		  xDir[count] = 0;
 		  if ((AD_value>1700) && (AD_value<2300)){
 			  xDir[count] = 6;
 		  }
 	  }
+	  // v kazdom kroku checkuje ci sa nenachadza medzi ramcom na lavej strane a objektom na pravej strane
 	  if (ballX[count]-1 < 57 && checkNextToBlock(matrix, ballX[count]+length,ballY[count], height)){
 		  xDir[count] = 0;
 	  }
+	  // v kazdom kroku checkuje ci sa nenachadza medzi ramcom na pravej strane a objektom na lavej strane
 	  if (ballX[count]+length > 116 && checkNextToBlock(matrix, ballX[count]-1,ballY[count], height)){
 		  xDir[count] = 0;
 	  }
+	  // v kazdom kroku checkuje ci sa nenachadza medzi ramcom na pravej strane a ramcom na lavej strane
 	  if (checkNextToBlock(matrix, ballX[count]+length,ballY[count], height) && checkNextToBlock(matrix, ballX[count]-1,ballY[count], height)){
 		  xDir[count] = 0;
+	  }
+
+	  // ak stlacime treti tlacidlo, tak posunutie dole je zrychlene
+	  if ((AD_value>3300) && (AD_value<3600)){
+		  if (checkBlockade(matrix, ballX[count],ballY[count]+height+6, length))
+			  ballY[count] += 0;
+		  else
+			  ballY[count] += 6;
 	  }
 
 	  // v kazdom kroku checkuje, ci sa nenachadza dalsi objekt alebo ramec pred objektom

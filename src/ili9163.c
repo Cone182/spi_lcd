@@ -487,7 +487,7 @@ void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length
 int checkBlockade(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length){
 	int temp = 0;
 	for(int i=0;i<length;i++)
-		if (matrix[x0+i][y0]==3)
+		if (matrix[x0+i][y0]==3 || matrix[x0+i][y0]==2)
 			temp=1;
 	return temp;
 }
