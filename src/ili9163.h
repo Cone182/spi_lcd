@@ -152,8 +152,9 @@ void lcdPutCh(unsigned char character, uint8_t x, uint8_t y, uint16_t fgColour, 
 void lcdPutS(const char *string, uint8_t x, uint8_t y, uint16_t fgColour, uint16_t bgColour);
 void startupNVIC();
 void adc_init(void);
-void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0);
-void deleteBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0);
-void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0);
-int checkBlockade(uint16_t matrix[128][128], int16_t x0, int16_t y0);
+void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length);
+void deleteBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length);
+void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length);
+int checkBlockade(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length);
+int checkNextToBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int height);
 #endif /* ILI9163LCD_H_ */

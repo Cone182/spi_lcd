@@ -650,44 +650,47 @@ int main(void)
 
   /* TODO - Add your application code here */
 
-  adc_init();
-  startupNVIC();
-  ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
-  initSPI2();
-  initCD_Pin();
-  initCS_Pin();
-  initRES_Pin();
-  //ssd1306_init();
+	adc_init();
+	startupNVIC();
+	ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
+	initSPI2();
+	initCD_Pin();
+	initCS_Pin();
+	initRES_Pin();
+	lcdInitialise(LCD_ORIENTATION0);
 
-  lcdInitialise(LCD_ORIENTATION0);
-
-  	lcdClearDisplay(decodeRgbValue(0, 0, 0));
+  	// vycisti obrazovku
+	lcdClearDisplay(decodeRgbValue(0, 0, 0));
+  	// vypis textov
   	lcdPutS("Tetris", lcdTextX(1), lcdTextY(1), decodeRgbValue(0, 0, 0), decodeRgbValue(31, 31, 31));
   	lcdPutS("Level", lcdTextX(1), lcdTextY(3), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
   	lcdPutS("1", lcdTextX(1), lcdTextY(4), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
   	lcdPutS("Score", lcdTextX(1), lcdTextY(6), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
   	lcdPutS("0", lcdTextX(1), lcdTextY(7), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
   	lcdPutS("Objekt", lcdTextX(1), lcdTextY(9), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
-  	//lcdFilledRectangle(58, 1, 126, 126, decodeRgbValue(0, 0, 0));
 
-  	// Run the LCD test
-  	uint8_t ballX[1000];
-  	uint8_t ballY[1000];
-  	uint8_t ballSpeed[1000];
-  	uint8_t xDir[1000];
-  	uint8_t yDir[1000];
-  	char c[4];
-  	int count;
-  	for (count = 0; count<1000;count++){
-		ballX[count] = 87; // zaciatocna pozicia kocky
-		ballY[count] = 1; // zaciatocna pozicia kocky
-		ballSpeed[count] = 1; // rychlost kocky
-		xDir[count] = 6; // smer kocky
-		yDir[count] = 6; // smer kocky
+  	// Parametre objektu
+  	uint8_t ballX[1000]; 		// X-ova pozicia
+  	uint8_t ballY[1000]; 		// Y-ova pozicia
+  	uint8_t xDir[1000];  		// velkost kroku na X-ovej osi
+  	uint8_t yDir[1000];			// velkost kroku na Y-ovej osi
+  	char c[4];					// cislo objektu
+  	int count;					// pocitadlo objektu
+  	int length = 0;				// dlzka objektu
+  	int height = 0;				// vyska objektu
+  	uint16_t matrix[128][128];	// matica hry
+
+  	//vytvorenie objektov
+  	for (count = 0; count < 1000; count++){
+		ballX[count] = 87; 	// zaciatocna X-ova pozicia objektu
+		ballY[count] = 1; 	// zaciatocna Y-ova pozicia objektu
+		xDir[count] = 6; 	// velkost jedneho kroku na X-ovej osi
+		yDir[count] = 6; 	// velkost jedneho kroku na Y-ovej osi
   	}
-  	count = 0;
+  	count = 0; 				// pocitadlo
 
-  	uint16_t matrix[128][128];
+
+  	// vytvorenie rámy a vyplnit vsetko ine na ciernu farbu
 	for(int i=56;i<118;i++){
 		for(int j=0;j<128;j++){
 			if(i==56)
@@ -701,14 +704,28 @@ int main(void)
 		}
 	}
 
+	length = 12;
+	height = 12;
+
   /* Infinite loop */
   while (1)
   {
+	  // v kazdom kroku aktualizuje maticu
 	  matrixPlot(matrix);
-	  sprintf(c, "%d", count);
+
+	  // vymaze dany objekt
+	  deleteBlock(matrix, ballX[count], ballY[count], length);
+
+	  // prehodi cislo na string
+	  sprintf(c, "%d", count+1);
+
+	  // vypise cislo objektu
 	  lcdPutS(c, lcdTextX(1), lcdTextY(10), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
-	  createBlock(matrix, ballX[count], ballY[count]);
+
+	  // v kazdom kroku posunuje objekt dolnym smerom
 	  ballY[count] += yDir[count];
+
+	  // ked gombiky su stlacene, tak posunuje objekt dolava alebo doprava
 	  if ((AD_value>1700) && (AD_value<2300)){
 		  ballX[count] -= xDir[count]; // dolava
 	  }
@@ -716,14 +733,43 @@ int main(void)
 		  ballX[count] += xDir[count]; // doprava
 	  }
 
-	  deleteBlock(matrix, ballX[count], ballY[count]-18);
-	  if (matrix[ballX[count]][ballY[count]+6] == 2 || checkBlockade(matrix, ballX[count],ballY[count]+6))
+	  // v kazdom kroku checkuje ci sa nenachadza nieco na lavej alebo na pravej strane objektu
+	  if (ballX[count]-1 < 57 || checkNextToBlock(matrix, ballX[count]-1,ballY[count], height)){ // lava strana
+		  xDir[count] = 0;
+		  if ((AD_value>2500) && (AD_value<3200)){
+			  xDir[count] = 6;
+		  }
+	  }
+	  if (ballX[count]+length > 116 || checkNextToBlock(matrix, ballX[count]+length,ballY[count], height)){ // prava strana
+		  xDir[count] = 0;
+		  if ((AD_value>1700) && (AD_value<2300)){
+			  xDir[count] = 6;
+		  }
+	  }
+	  if (ballX[count]-1 < 57 && checkNextToBlock(matrix, ballX[count]+length,ballY[count], height)){
+		  xDir[count] = 0;
+	  }
+	  if (ballX[count]+length > 116 && checkNextToBlock(matrix, ballX[count]-1,ballY[count], height)){
+		  xDir[count] = 0;
+	  }
+	  if (checkNextToBlock(matrix, ballX[count]+length,ballY[count], height) && checkNextToBlock(matrix, ballX[count]-1,ballY[count], height)){
+		  xDir[count] = 0;
+	  }
+
+	  // v kazdom kroku checkuje, ci sa nenachadza dalsi objekt alebo ramec pred objektom
+	  if (matrix[ballX[count]][ballY[count]+6] == 2 || checkBlockade(matrix, ballX[count],ballY[count]+6, length))
 	  {
+		  // zastavi sa objekt
 		  yDir[count] = 0;
-		  deleteBlock(matrix, ballX[count], ballY[count]-18);
-		  setBlockFixed(matrix, ballX[count], ballY[count]-6);
+		  // necha objekt ja konecnom mieste
+		  setBlockFixed(matrix, ballX[count], ballY[count]-6, length);
+		  // vygenerujeme dalsi objekt
 		  count++;
 	  }
+
+	  // vykresli dany objekt
+	  createBlock(matrix, ballX[count], ballY[count], length);
+
 	/*
 	sprintf(c, "%d", count);
 	lcdPutS(c, lcdTextX(1), lcdTextY(10), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));

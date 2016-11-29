@@ -465,29 +465,37 @@ void matrixPlot(uint16_t matrix[128][128]){
 
 }
 
-void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0){
-	for(int i=0;i<12;i++)
-		for(int j=0;j<12;j++)
+void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length){
+	for(int i=0;i<length;i++)
+		for(int j=0;j<length;j++)
 			matrix[x0+i][y0+j]=1;
 }
 
-void deleteBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0){
-	for(int i=-18;i<32;i++)
-		for(int j=-6;j<12;j++)
+void deleteBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length){
+	for(int i=0;i<length;i++)
+		for(int j=0;j<length;j++)
 			if(matrix[x0+i][y0+j]==1)
 				matrix[x0+i][y0+j]=0;
 }
 
-void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0){
-	for(int i=0;i<12;i++)
-		for(int j=0;j<12;j++)
+void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length){
+	for(int i=0;i<length;i++)
+		for(int j=0;j<length;j++)
 			matrix[x0+i][y0+j]=3;
 }
 
-int checkBlockade(uint16_t matrix[128][128], int16_t x0, int16_t y0){
+int checkBlockade(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length){
 	int temp = 0;
-	for(int i=0;i<12;i++)
+	for(int i=0;i<length;i++)
 		if (matrix[x0+i][y0]==3)
+			temp=1;
+	return temp;
+}
+
+int checkNextToBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int height){
+	int temp = 0;
+	for(int i=0;i<height;i++)
+		if (matrix[x0][y0+i]==3)
 			temp=1;
 	return temp;
 }
