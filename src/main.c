@@ -679,8 +679,8 @@ int main(void)
   	char c[4];
   	int count;
   	for (count = 0; count<1000;count++){
-		ballX[count] = 86; // zaciatocna pozicia kocky
-		ballY[count] = 6; // zaciatocna pozicia kocky
+		ballX[count] = 87; // zaciatocna pozicia kocky
+		ballY[count] = 1; // zaciatocna pozicia kocky
 		ballSpeed[count] = 1; // rychlost kocky
 		xDir[count] = 6; // smer kocky
 		yDir[count] = 6; // smer kocky
@@ -688,13 +688,11 @@ int main(void)
   	count = 0;
 
   	uint16_t matrix[128][128];
-	for(int i=67;i<128;i++){
+	for(int i=56;i<118;i++){
 		for(int j=0;j<128;j++){
-			if(i==67)
+			if(i==56)
 				matrix[i][j]=2;
-			else if(i==127)
-				matrix[i][j]=2;
-			else if(j==0)
+			else if(i==117)
 				matrix[i][j]=2;
 			else if(j==127)
 				matrix[i][j]=2;
@@ -719,7 +717,7 @@ int main(void)
 	  }
 
 	  deleteBlock(matrix, ballX[count], ballY[count]-18);
-	  if (matrix[ballX[count]][ballY[count]+6] == 2 || matrix[ballX[count]][ballY[count]+6] == 3)
+	  if (matrix[ballX[count]][ballY[count]+6] == 2 || checkBlockade(matrix, ballX[count],ballY[count]+6))
 	  {
 		  yDir[count] = 0;
 		  deleteBlock(matrix, ballX[count], ballY[count]-18);

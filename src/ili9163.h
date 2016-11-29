@@ -155,4 +155,5 @@ void adc_init(void);
 void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0);
 void deleteBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0);
 void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0);
+int checkBlockade(uint16_t matrix[128][128], int16_t x0, int16_t y0);
 #endif /* ILI9163LCD_H_ */

@@ -419,7 +419,7 @@ void lcdPutS(const char *string, uint8_t x, uint8_t y, uint16_t fgColour, uint16
 
 void matrixPlot(uint16_t matrix[128][128]){
 
-	uint16_t pixels[61*128];
+	uint16_t pixels[62*128];
 	uint16_t colour;
 	// To speed up plotting we define a x window with the width of the
 	// rectangle and then just output the required number of bytes to
@@ -427,7 +427,7 @@ void matrixPlot(uint16_t matrix[128][128]){
 
 	int countPix=0;
 	for(int i=0;i<128;i++){
-		for(int j=67;j<128;j++){
+		for(int j=56;j<118;j++){
 			pixels[countPix]=matrix[j][i];
 			countPix++;
 		}
@@ -435,19 +435,19 @@ void matrixPlot(uint16_t matrix[128][128]){
 
 	lcdWriteCommand(SET_COLUMN_ADDRESS); // Horizontal Address Start Position
 	lcdWriteParameter(0x1f);
-	lcdWriteParameter(67);
+	lcdWriteParameter(56);
 	lcdWriteParameter(0x1f);
-	lcdWriteParameter(127);
+	lcdWriteParameter(117);
 
 	lcdWriteCommand(SET_PAGE_ADDRESS); // Vertical Address end Position
-	lcdWriteParameter(67);
+	lcdWriteParameter(56);
 	lcdWriteParameter(0x20);
-	lcdWriteParameter(67);
+	lcdWriteParameter(56);
 	lcdWriteParameter(159);
 
 	lcdWriteCommand(WRITE_MEMORY_START);
 
-	for (int x = 0; x < (61*128); x++){
+	for (int x = 0; x < (62*128); x++){
 		if (pixels[x]==0){
 			colour = decodeRgbValue(0, 0, 0);
 		}
@@ -463,21 +463,6 @@ void matrixPlot(uint16_t matrix[128][128]){
 		lcdWriteData(colour >> 8, colour);;
 	}
 
-
-
-
-	/*for(int i=58;i<128;i++){
-		for(int j=0;j<128;j++){
-			if(matrix[i][j]==1)
-				lcdPlot(i, j, decodeRgbValue(31, 31, 31));
-			else if(matrix[i][j]==2)
-				lcdPlot(i, j, decodeRgbValue(12, 25, 5));
-			else if(matrix[i][j]==3)
-				lcdPlot(i, j, decodeRgbValue(31, 31, 31));
-			else
-				lcdPlot(i, j, decodeRgbValue(0, 0, 0));
-		}
-	}*/
 }
 
 void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0){
@@ -487,7 +472,7 @@ void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0){
 }
 
 void deleteBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0){
-	for(int i=-12;i<24;i++)
+	for(int i=-18;i<32;i++)
 		for(int j=-6;j<12;j++)
 			if(matrix[x0+i][y0+j]==1)
 				matrix[x0+i][y0+j]=0;
@@ -497,4 +482,12 @@ void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0){
 	for(int i=0;i<12;i++)
 		for(int j=0;j<12;j++)
 			matrix[x0+i][y0+j]=3;
+}
+
+int checkBlockade(uint16_t matrix[128][128], int16_t x0, int16_t y0){
+	int temp = 0;
+	for(int i=0;i<12;i++)
+		if (matrix[x0+i][y0]==3)
+			temp=1;
+	return temp;
 }
