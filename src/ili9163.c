@@ -30,6 +30,7 @@
 #include "font5x8.h"
 #include "spi.h"
 #include "ssd1306.h"
+#include "stm32l1xx.h"
 
 // Low-level LCD driving functions --------------------------------------------------------------------------
 
@@ -299,11 +300,13 @@ void lcdFilledRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t
 	lcdWriteParameter(0x00);
 	lcdWriteParameter(y1+32);
 
+
 	lcdWriteCommand(WRITE_MEMORY_START);
 
 	for (pixels = 0; pixels < ((x1 - x0) * (y1 - y0)); pixels++)
 		lcdWriteData(colour >> 8, colour);;
 }
+
 
 // Draw a circle
 // Note:	This is another version of Bresenham's line drawing algorithm.
@@ -412,4 +415,86 @@ void lcdPutS(const char *string, uint8_t x, uint8_t y, uint16_t fgColour, uint16
 		lcdPutCh(string[characterNumber], x, y, fgColour, bgColour);
 		x += 6;
 	}
+}
+
+void matrixPlot(uint16_t matrix[128][128]){
+
+	uint16_t pixels[61*128];
+	uint16_t colour;
+	// To speed up plotting we define a x window with the width of the
+	// rectangle and then just output the required number of bytes to
+	// fill down to the end point
+
+	int countPix=0;
+	for(int i=0;i<128;i++){
+		for(int j=67;j<128;j++){
+			pixels[countPix]=matrix[j][i];
+			countPix++;
+		}
+	}
+
+	lcdWriteCommand(SET_COLUMN_ADDRESS); // Horizontal Address Start Position
+	lcdWriteParameter(0x1f);
+	lcdWriteParameter(67);
+	lcdWriteParameter(0x1f);
+	lcdWriteParameter(127);
+
+	lcdWriteCommand(SET_PAGE_ADDRESS); // Vertical Address end Position
+	lcdWriteParameter(67);
+	lcdWriteParameter(0x20);
+	lcdWriteParameter(67);
+	lcdWriteParameter(159);
+
+	lcdWriteCommand(WRITE_MEMORY_START);
+
+	for (int x = 0; x < (61*128); x++){
+		if (pixels[x]==0){
+			colour = decodeRgbValue(0, 0, 0);
+		}
+		else if (pixels[x]==1){
+			colour = decodeRgbValue(31, 31, 31);
+		}
+		else if (pixels[x]==2){
+			colour = decodeRgbValue(12, 25, 5);
+		}
+		else if (pixels[x]==3){
+			colour = decodeRgbValue(31, 31, 31);
+		}
+		lcdWriteData(colour >> 8, colour);;
+	}
+
+
+
+
+	/*for(int i=58;i<128;i++){
+		for(int j=0;j<128;j++){
+			if(matrix[i][j]==1)
+				lcdPlot(i, j, decodeRgbValue(31, 31, 31));
+			else if(matrix[i][j]==2)
+				lcdPlot(i, j, decodeRgbValue(12, 25, 5));
+			else if(matrix[i][j]==3)
+				lcdPlot(i, j, decodeRgbValue(31, 31, 31));
+			else
+				lcdPlot(i, j, decodeRgbValue(0, 0, 0));
+		}
+	}*/
+}
+
+void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0){
+	for(int i=0;i<12;i++)
+		for(int j=0;j<12;j++)
+			matrix[x0+i][y0+j]=1;
+}
+
+void deleteBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0){
+	for(int i=-12;i<24;i++)
+		for(int j=-6;j<12;j++)
+			if(matrix[x0+i][y0+j]==1)
+				matrix[x0+i][y0+j]=0;
+}
+
+void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0){
+	for(int i=0;i<12;i++)
+		for(int j=0;j<12;j++)
+			matrix[x0+i][y0+j]=3;
 }

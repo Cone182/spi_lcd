@@ -147,8 +147,12 @@ void lcdLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t colour);
 void lcdRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t colour);
 void lcdFilledRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t colour);
 void lcdCircle(int16_t xCentre, int16_t yCentre, int16_t radius, uint16_t colour);
-
+void matrixPlot();
 void lcdPutCh(unsigned char character, uint8_t x, uint8_t y, uint16_t fgColour, uint16_t bgColour);
 void lcdPutS(const char *string, uint8_t x, uint8_t y, uint16_t fgColour, uint16_t bgColour);
-
+void startupNVIC();
+void adc_init(void);
+void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0);
+void deleteBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0);
+void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0);
 #endif /* ILI9163LCD_H_ */

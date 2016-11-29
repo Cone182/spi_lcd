@@ -22,6 +22,8 @@
 *****************************************************************************
 */
 
+
+
 /* Includes */
 #include <stddef.h>
 #include "stm32l1xx.h"
@@ -29,6 +31,64 @@
 #include "spi.h"
 #include "ssd1306.h"
 #include "ili9163.h"
+
+volatile int AD_value = 0;
+
+void ADC1_IRQHandler(void) {
+	if (ADC1->SR & ADC_SR_EOC) {
+		AD_value = ADC1->DR;
+	}
+}
+
+void adc_init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+  ADC_InitTypeDef ADC_InitStructure;
+  /* Enable GPIO clock */
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+  /* Configure ADCx Channel 2 as analog input */
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 ;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+  /* Enable the HSI oscillator */
+  RCC_HSICmd(ENABLE);
+  /* Check that HSI oscillator is ready */
+  while(RCC_GetFlagStatus(RCC_FLAG_HSIRDY) == RESET);
+  /* Enable ADC clock */
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+  /* Initialize ADC structure */
+  ADC_StructInit(&ADC_InitStructure);
+  /* ADC1 configuration */
+  ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
+  ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
+  ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
+  ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+  ADC_InitStructure.ADC_NbrOfConversion = 1;
+  ADC_Init(ADC1, &ADC_InitStructure);
+  /* ADCx regular channel8 configuration */
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_96Cycles);
+  /* Enable the ADC */
+  ADC_Cmd(ADC1, ENABLE);
+
+  /* Wait until the ADC1 is ready */
+  while(ADC_GetFlagStatus(ADC1, ADC_FLAG_ADONS) == RESET)
+  {
+  }
+  /* Start ADC Software Conversion */
+  ADC_SoftwareStartConv(ADC1);
+}
+
+void startupNVIC(){
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
+
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitStructure.NVIC_IRQChannel = ADC1_IRQn; // nam prerušení nájdete v súbore stm32l1xx.h
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+}
 
 /* Private typedef */
 /* Private define  */
@@ -590,6 +650,9 @@ int main(void)
 
   /* TODO - Add your application code here */
 
+  adc_init();
+  startupNVIC();
+  ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
   initSPI2();
   initCD_Pin();
   initCS_Pin();
@@ -599,63 +662,122 @@ int main(void)
   lcdInitialise(LCD_ORIENTATION0);
 
   	lcdClearDisplay(decodeRgbValue(0, 0, 0));
+  	lcdPutS("Tetris", lcdTextX(1), lcdTextY(1), decodeRgbValue(0, 0, 0), decodeRgbValue(31, 31, 31));
+  	lcdPutS("Level", lcdTextX(1), lcdTextY(3), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
+  	lcdPutS("1", lcdTextX(1), lcdTextY(4), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
+  	lcdPutS("Score", lcdTextX(1), lcdTextY(6), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
+  	lcdPutS("0", lcdTextX(1), lcdTextY(7), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
+  	lcdPutS("Objekt", lcdTextX(1), lcdTextY(9), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
+  	//lcdFilledRectangle(58, 1, 126, 126, decodeRgbValue(0, 0, 0));
 
-  	/*lcdLine(0, 0, 127, 127, decodeRgbValue(31, 31, 31));
-  	lcdLine(0, 127, 127, 0, decodeRgbValue(31, 31, 31));
-  	lcdCircle(64, 64, 32, decodeRgbValue(31, 0, 0));
-  	lcdCircle(64, 64, 40, decodeRgbValue(0, 31, 0));
-  	lcdCircle(64, 64, 48, decodeRgbValue(0, 0, 31));*/
+  	// Run the LCD test
+  	uint8_t ballX[1000];
+  	uint8_t ballY[1000];
+  	uint8_t ballSpeed[1000];
+  	uint8_t xDir[1000];
+  	uint8_t yDir[1000];
+  	char c[4];
+  	int count;
+  	for (count = 0; count<1000;count++){
+		ballX[count] = 86; // zaciatocna pozicia kocky
+		ballY[count] = 6; // zaciatocna pozicia kocky
+		ballSpeed[count] = 1; // rychlost kocky
+		xDir[count] = 6; // smer kocky
+		yDir[count] = 6; // smer kocky
+  	}
+  	count = 0;
 
-  	lcdPutS("Tetris", lcdTextX(1), lcdTextY(0), decodeRgbValue(0, 0, 0), decodeRgbValue(31, 31, 31));
-
-  	lcdPutS("Level", lcdTextX(1), lcdTextY(2), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
-  	lcdPutS("1", lcdTextX(1), lcdTextY(3), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
-  	lcdPutS("Score", lcdTextX(1), lcdTextY(5), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
-  	lcdPutS("46200", lcdTextX(1), lcdTextY(6), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
-
-  	//lcdPutS("Test", 23, 17, 0xFFFF, 0);
-
-
-  	lcdFilledRectangle(64, 1, 128, 128, decodeRgbValue(0, 0, 0));
-  	lcdRectangle(57, 1, 127 , 127, decodeRgbValue(31, 31, 31));
-
-	// Run the LCD test
-	uint8_t ballX = 70, ballY = 70;
-	int8_t ballSpeed = 1;
-	int8_t xDir = ballSpeed, yDir = ballSpeed;
+  	uint16_t matrix[128][128];
+	for(int i=67;i<128;i++){
+		for(int j=0;j<128;j++){
+			if(i==67)
+				matrix[i][j]=2;
+			else if(i==127)
+				matrix[i][j]=2;
+			else if(j==0)
+				matrix[i][j]=2;
+			else if(j==127)
+				matrix[i][j]=2;
+			else
+				matrix[i][j]=0;
+		}
+	}
 
   /* Infinite loop */
   while (1)
   {
-	  // Delete the ball
-	  		lcdFilledRectangle(ballX-2, ballY-1, ballX+2, ballY+2, decodeRgbValue(0, 0, 0));
-	  		//lcdLine(1, 1, 128, 128, decodeRgbValue(0, 0, 25));
-	  		//lcdPutS("o", ballX, ballY, 0, 0);
+	  matrixPlot(matrix);
+	  sprintf(c, "%d", count);
+	  lcdPutS(c, lcdTextX(1), lcdTextY(10), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
+	  createBlock(matrix, ballX[count], ballY[count]);
+	  ballY[count] += yDir[count];
+	  if ((AD_value>1700) && (AD_value<2300)){
+		  ballX[count] -= xDir[count]; // dolava
+	  }
+	  if ((AD_value>2500) && (AD_value<3200)){
+		  ballX[count] += xDir[count]; // doprava
+	  }
 
-	  		// Delete the bat
-	  		lcdFilledRectangle(ballX-4, 124, ballX+4, 126, decodeRgbValue(0, 0, 0));
+	  deleteBlock(matrix, ballX[count], ballY[count]-18);
+	  if (matrix[ballX[count]][ballY[count]+6] == 2 || matrix[ballX[count]][ballY[count]+6] == 3)
+	  {
+		  yDir[count] = 0;
+		  deleteBlock(matrix, ballX[count], ballY[count]-18);
+		  setBlockFixed(matrix, ballX[count], ballY[count]-6);
+		  count++;
+	  }
+	/*
+	sprintf(c, "%d", count);
+	lcdPutS(c, lcdTextX(1), lcdTextY(10), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
+	lcdRectangle(61, 1, 127 , 127, decodeRgbValue(31, 31, 31)); //
+	// Delete the objekt
+	lcdFilledRectangle(ballX[count]-3, ballY[count]-3, ballX[count]+2, ballY[count]+2, decodeRgbValue(0, 0, 0));
 
-	  		// Move the ball
-	  		ballX += xDir;
-	  		ballY += yDir;
+	// Move the ball x-axis
+	if ((AD_value>1700) && (AD_value<2300)){
+		ballX[count] -= xDir[count]; // dolava
+	}
+	if ((AD_value>2500) && (AD_value<3200)){
+		ballX[count] += xDir[count]; // doprava
+	}
+	// Move the ball y-axis
+	if ((AD_value>3300) && (AD_value<3600)){
+		if (ballY[count] > 120){
+			ballY[count] += yDir[count];
+		}
+		else{
+			ballY[count] += yDir[count]+5;
+		}
+	}
+	else{
+		ballY[count] += yDir[count];
+	}
 
-	  		// Range check
-	  		if (ballX > 120) xDir = -ballSpeed;
-	  		if (ballX < 8) xDir = ballSpeed;
 
-	  		if (ballY > 120) yDir = -ballSpeed;
-	  		if (ballY < 70) yDir = ballSpeed;
+	// Range check
+	if (ballX[count] < 66){
+		xDir[count] = 0;
+		if ((AD_value>2500) && (AD_value<3200)){
+			xDir[count] = 5;
+		}
+	}
+	if (ballX[count] > 123){
+		xDir[count] = 0;
+		if ((AD_value>1700) && (AD_value<2300)){
+			xDir[count] = 5;
+		}
+	}
 
-	  		// Plot the ball
-	  		lcdFilledRectangle(ballX-2, ballY-1, ballX+2, ballY+2, decodeRgbValue(31, 31, 31));
+	if (ballY[count] > 125)
+	{
+		yDir[count] = 0;
+		lcdFilledRectangle(ballX[count]-3, ballY[count]-3, ballX[count]+2, ballY[count]+2, decodeRgbValue(31, 31, 31));
+		count++;
+	}
 
-	  		//lcdPutS("o", ballX, ballY, 0xFFFF, 0);
-
-	  		// Plot the bat
-	  		lcdFilledRectangle(ballX-4, 124, ballX+4, 126, decodeRgbValue(31, 0, 31));
-
-	  		//lcdPutS("Hello World!", lcdTextX(4), lcdTextY(0), decodeRgbValue(0, 0, 0), decodeRgbValue(31, 31, 31));
-	  		Delay(5000);
+	// Plot the objekt
+	lcdFilledRectangle(ballX[count]-3, ballY[count]-3, ballX[count]+2, ballY[count]+2, decodeRgbValue(31, 31, 31));
+	*/Delay(1000);
   }
   return 0;
 }
