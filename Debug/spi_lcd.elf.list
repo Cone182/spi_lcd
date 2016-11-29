@@ -31,15 +31,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  13 .debug_ranges 00000968  00000000  00000000  00029d70  2**3
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_line   0000368a  00000000  00000000  0002a6d8  2**0
+ 14 .debug_line   00003688  00000000  00000000  0002a6d8  2**0
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_str    00002f91  00000000  00000000  0002dd62  2**0
+ 15 .debug_str    00002f91  00000000  00000000  0002dd60  2**0
                   CONTENTS, READONLY, DEBUGGING
- 16 .comment      0000007e  00000000  00000000  00030cf3  2**0
+ 16 .comment      0000007e  00000000  00000000  00030cf1  2**0
                   CONTENTS, READONLY
- 17 .debug_frame  00002c5c  00000000  00000000  00030d74  2**2
+ 17 .debug_frame  00002c5c  00000000  00000000  00030d70  2**2
                   CONTENTS, READONLY, DEBUGGING
- 18 .stabstr      0000003f  00000000  00000000  000339d0  2**0
+ 18 .stabstr      0000003f  00000000  00000000  000339cc  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -5469,12 +5469,7 @@ int main(void)
  800258c:	f103 03a8 	add.w	r3, r3, #168	; 0xa8
  8002590:	681b      	ldr	r3, [r3, #0]
  8002592:	f7ff f8fd 	bl	8001790 <createBlock>
-		count++;
-	}
-
-	// Plot the objekt
-	lcdFilledRectangle(ballX[count]-3, ballY[count]-3, ballX[count]+2, ballY[count]+2, decodeRgbValue(31, 31, 31));
-	*/Delay(1000);
+	  Delay(1000);
  8002596:	f44f 707a 	mov.w	r0, #1000	; 0x3e8
  800259a:	f000 f803 	bl	80025a4 <Delay>
   }

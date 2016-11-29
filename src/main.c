@@ -761,59 +761,7 @@ int main(void)
 
 	  // vykresli dany objekt
 	  createBlock(matrix, ballX[count], ballY[count], length);
-
-	/*
-	sprintf(c, "%d", count);
-	lcdPutS(c, lcdTextX(1), lcdTextY(10), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
-	lcdRectangle(61, 1, 127 , 127, decodeRgbValue(31, 31, 31)); //
-	// Delete the objekt
-	lcdFilledRectangle(ballX[count]-3, ballY[count]-3, ballX[count]+2, ballY[count]+2, decodeRgbValue(0, 0, 0));
-
-	// Move the ball x-axis
-	if ((AD_value>1700) && (AD_value<2300)){
-		ballX[count] -= xDir[count]; // dolava
-	}
-	if ((AD_value>2500) && (AD_value<3200)){
-		ballX[count] += xDir[count]; // doprava
-	}
-	// Move the ball y-axis
-	if ((AD_value>3300) && (AD_value<3600)){
-		if (ballY[count] > 120){
-			ballY[count] += yDir[count];
-		}
-		else{
-			ballY[count] += yDir[count]+5;
-		}
-	}
-	else{
-		ballY[count] += yDir[count];
-	}
-
-
-	// Range check
-	if (ballX[count] < 66){
-		xDir[count] = 0;
-		if ((AD_value>2500) && (AD_value<3200)){
-			xDir[count] = 5;
-		}
-	}
-	if (ballX[count] > 123){
-		xDir[count] = 0;
-		if ((AD_value>1700) && (AD_value<2300)){
-			xDir[count] = 5;
-		}
-	}
-
-	if (ballY[count] > 125)
-	{
-		yDir[count] = 0;
-		lcdFilledRectangle(ballX[count]-3, ballY[count]-3, ballX[count]+2, ballY[count]+2, decodeRgbValue(31, 31, 31));
-		count++;
-	}
-
-	// Plot the objekt
-	lcdFilledRectangle(ballX[count]-3, ballY[count]-3, ballX[count]+2, ballY[count]+2, decodeRgbValue(31, 31, 31));
-	*/Delay(1000);
+	  Delay(1000);
   }
   return 0;
 }
