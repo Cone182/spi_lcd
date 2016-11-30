@@ -692,7 +692,6 @@ int main(void)
   {
 	  // v kazdom kroku aktualizuje maticu
 	  matrixPlot(matrix);
-
 	  // vymaze dany objekt
 	  deleteBlock(matrix, ballX[count], ballY[count], length);
 
@@ -758,7 +757,8 @@ int main(void)
 		  // vygenerujeme dalsi objekt
 		  count++;
 	  }
-
+	  // checkuje naplnene riadky
+	  checkLineFilled(matrix);
 	  // vykresli dany objekt
 	  createBlock(matrix, ballX[count], ballY[count], length);
 	  Delay(1000);

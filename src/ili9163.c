@@ -499,3 +499,23 @@ int checkNextToBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int heig
 			temp=1;
 	return temp;
 }
+
+void checkLineFilled(uint16_t matrix[128][128]){
+	int temp = 0;
+	int cRow[127];
+	int cCol[60];
+	for (int x =0; x<127;x++){
+		cRow[x]=0;
+	}
+	for(int i=0;i<127;i++){
+		for(int j=57;j<117;j++){
+			if (matrix[j][i]==3)
+				cRow[i] += 1;
+			}
+		if (cRow[i]==60){
+			for(int j=57;j<117;j++){
+				matrix[j][i]=0;
+			}
+		}
+	}
+}
