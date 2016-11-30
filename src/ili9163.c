@@ -501,7 +501,6 @@ int checkNextToBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int heig
 }
 
 void checkLineFilled(uint16_t matrix[128][128]){
-	int temp = 0;
 	int cRow[127];
 	int count = 0;
 	for (int x =0; x<127;x++){
@@ -522,9 +521,11 @@ void checkLineFilled(uint16_t matrix[128][128]){
 	for(int i=0;i<127;i++){
 		for(int j=57;j<117;j++){
 			if (cRow[i]==60){
-				temp = matrix[j][i];
-				matrix[j][i] = matrix[j][i-count];
-				matrix[j][i-count] = temp;
+				int pom = i;
+				while(pom!=0){
+					matrix[j][pom] = matrix[j][pom-1];
+					pom--;
+				}
 			}
 		}
 	}
