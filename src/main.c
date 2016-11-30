@@ -716,7 +716,7 @@ int main(void)
 	  if (ballX[count]-1 < 57 || checkNextToBlock(matrix, ballX[count]-1,ballY[count], height)){ // lava strana
 		  xDir[count] = 0;
 		  if ((AD_value>2500) && (AD_value<3200)){
-			  xDir[count] = 6;
+			  xDir[count] = 12;
 		  }
 	  }
 	  // v kazdom kroku checkuje ci sa nenachadza nieco na pravej objektu
