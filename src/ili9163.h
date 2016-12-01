@@ -142,21 +142,18 @@ void lcdWriteData(uint8_t dataByte1, uint8_t dataByte2);
 void lcdInitialise(uint8_t orientation);
 
 void lcdClearDisplay(uint16_t colour);
-void lcdPlot(uint8_t x, uint8_t y, uint16_t colour);
-void lcdLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t colour);
-void lcdRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t colour);
-void lcdFilledRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t colour);
-void lcdCircle(int16_t xCentre, int16_t yCentre, int16_t radius, uint16_t colour);
 void matrixPlot();
 void lcdPutCh(unsigned char character, uint8_t x, uint8_t y, uint16_t fgColour, uint16_t bgColour);
 void lcdPutS(const char *string, uint8_t x, uint8_t y, uint16_t fgColour, uint16_t bgColour);
+
 void startupNVIC();
 void adc_init(void);
-void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length);
-void deleteBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length);
-void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length);
+
+void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length, int height);
+void deleteBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length, int height);
+void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length, int height);
 int checkBlockade(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length);
 int checkNextToBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int height);
-void checkLineFilled(uint16_t matrix[128][128]);
+int checkLineFilled(uint16_t matrix[128][128]);
 int checkGameOver(uint16_t matrix[128][128]);
 #endif /* ILI9163LCD_H_ */

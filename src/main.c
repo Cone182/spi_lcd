@@ -31,6 +31,8 @@
 #include "spi.h"
 #include "ssd1306.h"
 #include "ili9163.h"
+#include <time.h>
+#include <stdlib.h>
 
 volatile int AD_value = 0;
 
@@ -685,9 +687,37 @@ int main(void)
 		}
 	}
 
-	// sirka a vyska objektu
-	length = 12;
-	height = 12;
+	srand(time(NULL));
+	int cisloTvaru = rand()%7;
+
+	if (cisloTvaru == 0){ // stvorec
+		length = 12;
+		height = 12;
+	}
+	else if (cisloTvaru == 1){ // stlpec
+		length = 6;
+		height = 24;
+	}
+	else if (cisloTvaru == 2){ // trojuholnik
+		length = 18;
+		height = 12;
+	}
+	else if (cisloTvaru == 3){ // zecko lava
+		length = 18;
+		height = 12;
+	}
+	else if (cisloTvaru == 4){ // zecko prava
+		length = 18;
+		height = 12;
+	}
+	else if (cisloTvaru == 5){ // elko lava
+		length = 12;
+		height = 18;
+	}
+	else if (cisloTvaru == 6){ // elko prava
+		length = 12;
+		height = 18;
+	}
 
   /* Infinite loop */
   while (1)
@@ -695,7 +725,7 @@ int main(void)
 	  // v kazdom kroku aktualizuje maticu
 	  matrixPlot(matrix);
 	  // vymaze dany objekt
-	  deleteBlock(matrix, ballX[count], ballY[count], length);
+	  deleteBlock(matrix, ballX[count], ballY[count], length, height);
 
 	  // prehodi cislo na string
 	  sprintf(c, "%d", count+1);
@@ -750,28 +780,61 @@ int main(void)
 	  }
 
 	  // v kazdom kroku checkuje, ci sa nenachadza dalsi objekt alebo ramec pred objektom
-	  if (matrix[ballX[count]][ballY[count]+6] == 2 || checkBlockade(matrix, ballX[count],ballY[count]+6, length))
+	  if (matrix[ballX[count]][ballY[count]+(height-6)] == 2 || checkBlockade(matrix, ballX[count],ballY[count]+(height-6), length))
 	  {
 		  // zastavi sa objekt
 		  yDir[count] = 0;
 		  // necha objekt ja konecnom mieste
-		  setBlockFixed(matrix, ballX[count], ballY[count]-6, length);
+		  setBlockFixed(matrix, ballX[count], ballY[count]-6, length, height);
 		  // GAME OVER
 		  if(checkGameOver(matrix)){
 			  lcdClearDisplay(decodeRgbValue(0, 0, 0));
 			  lcdPutS("Game Over", lcdTextX(1), lcdTextY(1), decodeRgbValue(0, 0, 0), decodeRgbValue(31, 31, 31));
+			  lcdPutS("Your score is:", lcdTextX(1), lcdTextY(3), decodeRgbValue(31, 31, 31), decodeRgbValue(0, 0, 0));
+			  lcdPutS(scoree, lcdTextX(1), lcdTextY(4), decodeRgbValue(31, 31, 31), decodeRgbValue(0, 0, 0));
+			  lcdPutS("Please press reset  to start over!", lcdTextX(1), lcdTextY(6), decodeRgbValue(31, 31, 31), decodeRgbValue(0, 0, 0));
 			  break;
+		  }
+
+		  int cisloTvaru = rand()%7;
+		  if (cisloTvaru == 0){ // stvorec
+			  length = 12;
+			  height = 12;
+		  }
+		  else if (cisloTvaru == 1){ // stlpec
+			  length = 6;
+			  height = 24;
+		  }
+		  else if (cisloTvaru == 2){ // trojuholnik
+			  length = 18;
+			  height = 12;
+		  }
+		  else if (cisloTvaru == 3){ // zecko lava
+			  length = 18;
+			  height = 12;
+		  }
+		  else if (cisloTvaru == 4){ // zecko prava
+			  length = 18;
+			  height = 12;
+		  }
+		  else if (cisloTvaru == 5){ // elko lava
+			  length = 12;
+			  height = 18;
+		  }
+		  else if (cisloTvaru == 6){ // elko prava
+			  length = 12;
+			  height = 18;
 		  }
 		  // vygenerujeme dalsi objekt
 		  count++;
 	  }
 	  // checkuje naplnene riadky
-	  checkLineFilled(matrix);
+	  score += checkLineFilled(matrix);
 	  // Vypise score
 	  sprintf(scoree, "%d", score);
 	  lcdPutS(scoree, lcdTextX(1), lcdTextY(7), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
 	  // vykresli dany objekt
-	  createBlock(matrix, ballX[count], ballY[count], length);
+	  createBlock(matrix, ballX[count], ballY[count], length, height);
 	  Delay(1000);
   }
   return 0;

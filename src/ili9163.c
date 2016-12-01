@@ -188,157 +188,6 @@ void lcdClearDisplay(uint16_t colour)
 	for(pixel = 0; pixel < 16385; pixel++) lcdWriteData(colour >> 8, colour);
 }
 
-void lcdPlot(uint8_t x, uint8_t y, uint16_t colour)
-{
-	// Horizontal Address Start Position
-	lcdWriteCommand(SET_COLUMN_ADDRESS);
-	lcdWriteParameter(0x1f);
-	lcdWriteParameter(x);
-	lcdWriteParameter(0x1f);
-	lcdWriteParameter(0x7f);
-
-	// Vertical Address end Position
-	lcdWriteCommand(SET_PAGE_ADDRESS);
-	lcdWriteParameter(0x00);
-	lcdWriteParameter(y+32);
-	lcdWriteParameter(0x00);
-	lcdWriteParameter(0x9f);//7f
-
-	// Plot the point
-	lcdWriteCommand(WRITE_MEMORY_START);
-	lcdWriteData(colour >> 8, colour);
-}
-
-// Draw a line from x0, y0 to x1, y1
-// Note:	This is a version of Bresenham's line drawing algorithm
-//			It only draws lines from left to right!
-void lcdLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t colour)
-{
-	int16_t dy = y1 - y0;
-	int16_t dx = x1 - x0;
-	int16_t stepx, stepy;
-
-	if (dy < 0)
-	{
-		dy = -dy; stepy = -1;
-	}
-	else stepy = 1;
-
- 	if (dx < 0)
-	{
-		dx = -dx; stepx = -1;
-	}
-	else stepx = 1;
-
-	dy <<= 1; 							// dy is now 2*dy
-	dx <<= 1; 							// dx is now 2*dx
-
-	lcdPlot(x0, y0, colour);
-
-	if (dx > dy) {
-		int fraction = dy - (dx >> 1);	// same as 2*dy - dx
-		while (x0 != x1)
-		{
-			if (fraction >= 0)
-			{
-				y0 += stepy;
-				fraction -= dx; 		// same as fraction -= 2*dx
-			}
-
-   			x0 += stepx;
-   			fraction += dy; 				// same as fraction -= 2*dy
-   			lcdPlot(x0, y0, colour);
-		}
-	}
-	else
-	{
-		int fraction = dx - (dy >> 1);
-		while (y0 != y1)
-		{
-			if (fraction >= 0)
-			{
-				x0 += stepx;
-				fraction -= dy;
-			}
-
-			y0 += stepy;
-			fraction += dx;
-			lcdPlot(x0, y0, colour);
-		}
-	}
-}
-
-// Draw a rectangle between x0, y0 and x1, y1
-void lcdRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t colour)
-{
-	lcdLine(x0, y0, x0, y1, colour);
-	lcdLine(x0, y1, x1, y1, colour);
-	lcdLine(x1, y0, x1, y1, colour);
-	lcdLine(x0, y0, x1, y0, colour);
-}
-
-// Draw a filled rectangle
-// Note:	y1 must be greater than y0  and x1 must be greater than x0
-//			for this to work
-void lcdFilledRectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t colour)
-{
-	uint16_t pixels;
-
-	// To speed up plotting we define a x window with the width of the
-	// rectangle and then just output the required number of bytes to
-	// fill down to the end point
-
-	lcdWriteCommand(SET_COLUMN_ADDRESS); // Horizontal Address Start Position
-	lcdWriteParameter(0x1f);
-	lcdWriteParameter(x0);
-	lcdWriteParameter(0x1f);
-	lcdWriteParameter(x1);
-
-	lcdWriteCommand(SET_PAGE_ADDRESS); // Vertical Address end Position
-	lcdWriteParameter(0x00);
-	lcdWriteParameter(y0+32);
-	lcdWriteParameter(0x00);
-	lcdWriteParameter(y1+32);
-
-
-	lcdWriteCommand(WRITE_MEMORY_START);
-
-	for (pixels = 0; pixels < ((x1 - x0) * (y1 - y0)); pixels++)
-		lcdWriteData(colour >> 8, colour);;
-}
-
-
-// Draw a circle
-// Note:	This is another version of Bresenham's line drawing algorithm.
-//			There's plenty of documentation on the web if you are curious
-//			how this works.
-void lcdCircle(int16_t xCentre, int16_t yCentre, int16_t radius, uint16_t colour)
-{
-	int16_t x = 0, y = radius;
-	int16_t d = 3 - (2 * radius);
-
-    while(x <= y)
-	{
-		lcdPlot(xCentre + x, yCentre + y, colour);
-		lcdPlot(xCentre + y, yCentre + x, colour);
-		lcdPlot(xCentre - x, yCentre + y, colour);
-		lcdPlot(xCentre + y, yCentre - x, colour);
-		lcdPlot(xCentre - x, yCentre - y, colour);
-		lcdPlot(xCentre - y, yCentre - x, colour);
-		lcdPlot(xCentre + x, yCentre - y, colour);
-		lcdPlot(xCentre - y, yCentre + x, colour);
-
-		if (d < 0) d += (4 * x) + 6;
-		else
-		{
-			d += (4 * (x - y)) + 10;
-			y -= 1;
-		}
-
-		x++;
-	}
-}
-
 // LCD text manipulation functions --------------------------------------------------------------------------
 #define pgm_read_byte_near(address_short) (uint16_t)(address_short)
 // Plot a character at the specified x, y co-ordinates (top left hand corner of character)
@@ -465,22 +314,22 @@ void matrixPlot(uint16_t matrix[128][128]){
 
 }
 
-void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length){
+void createBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length, int height){
 	for(int i=0;i<length;i++)
-		for(int j=0;j<length;j++)
+		for(int j=0;j<height;j++)
 			matrix[x0+i][y0+j]=1;
 }
 
-void deleteBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length){
+void deleteBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length, int height){
 	for(int i=0;i<length;i++)
-		for(int j=0;j<length;j++)
+		for(int j=0;j<height;j++)
 			if(matrix[x0+i][y0+j]==1)
 				matrix[x0+i][y0+j]=0;
 }
 
-void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length){
+void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length, int height){
 	for(int i=0;i<length;i++)
-		for(int j=0;j<length;j++)
+		for(int j=0;j<height;j++)
 			matrix[x0+i][y0+j]=3;
 }
 
@@ -500,8 +349,9 @@ int checkNextToBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int heig
 	return temp;
 }
 
-void checkLineFilled(uint16_t matrix[128][128]){
+int checkLineFilled(uint16_t matrix[128][128]){
 	int cRow[127];
+	int temp = 0;
 	int count=0;
 	for (int x =0; x<127;x++){
 		cRow[x]=0;
@@ -529,6 +379,14 @@ void checkLineFilled(uint16_t matrix[128][128]){
 			}
 		}
 	}
+	if (count/6 == 1 || count/6 == 2 || count/6 == 3){
+		temp = 100;
+	}
+	else if (count/6 == 4){
+		temp = 800;
+	}
+
+	return temp;
 }
 
 int checkGameOver(uint16_t matrix[128][128]){
@@ -542,3 +400,4 @@ int checkGameOver(uint16_t matrix[128][128]){
 	}
 	return temp;
 }
+
