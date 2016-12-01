@@ -645,7 +645,7 @@ int main(void)
   	lcdPutS("Level", lcdTextX(1), lcdTextY(3), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
   	lcdPutS("1", lcdTextX(1), lcdTextY(4), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
   	lcdPutS("Score", lcdTextX(1), lcdTextY(6), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
-  	lcdPutS("0", lcdTextX(1), lcdTextY(7), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
+
   	lcdPutS("Objekt", lcdTextX(1), lcdTextY(9), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
 
   	// Parametre objektu
@@ -655,6 +655,8 @@ int main(void)
   	uint8_t yDir[1000];			// velkost kroku na Y-ovej osi
   	char c[4];					// cislo objektu
   	int count;					// pocitadlo objektu
+  	int score = 0;				// score v trave int
+  	char scoree[8];				// score v tvare string
   	int length = 0;				// dlzka objektu
   	int height = 0;				// vyska objektu
   	uint16_t matrix[128][128];	// matica hry
@@ -754,11 +756,20 @@ int main(void)
 		  yDir[count] = 0;
 		  // necha objekt ja konecnom mieste
 		  setBlockFixed(matrix, ballX[count], ballY[count]-6, length);
+		  // GAME OVER
+		  if(checkGameOver(matrix)){
+			  lcdClearDisplay(decodeRgbValue(0, 0, 0));
+			  lcdPutS("Game Over", lcdTextX(1), lcdTextY(1), decodeRgbValue(0, 0, 0), decodeRgbValue(31, 31, 31));
+			  break;
+		  }
 		  // vygenerujeme dalsi objekt
 		  count++;
 	  }
 	  // checkuje naplnene riadky
 	  checkLineFilled(matrix);
+	  // Vypise score
+	  sprintf(scoree, "%d", score);
+	  lcdPutS(scoree, lcdTextX(1), lcdTextY(7), decodeRgbValue(255, 255, 255), decodeRgbValue(0, 0, 0));
 	  // vykresli dany objekt
 	  createBlock(matrix, ballX[count], ballY[count], length);
 	  Delay(1000);

@@ -158,4 +158,5 @@ void setBlockFixed(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length
 int checkBlockade(uint16_t matrix[128][128], int16_t x0, int16_t y0, int length);
 int checkNextToBlock(uint16_t matrix[128][128], int16_t x0, int16_t y0, int height);
 void checkLineFilled(uint16_t matrix[128][128]);
+int checkGameOver(uint16_t matrix[128][128]);
 #endif /* ILI9163LCD_H_ */
